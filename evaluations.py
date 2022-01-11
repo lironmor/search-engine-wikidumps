@@ -1,5 +1,5 @@
 from search_backend import merge_results, BM25_from_index
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 
 def intersection(l1,l2):
@@ -111,7 +111,7 @@ def evaluate(true_relevancy, predicted_relevancy, k, print_scores=False):
     return metrices
 
 
-def grid_search_models(data, true_relevancy, DL_body, index_type_body, DL_title, index_type_title, bm25_param_list, w_list, N, idx_title, idx_body, IdTitle, page_rank):
+def grid_search_models(data, true_relevancy, DL_body, index_type_body, DL_title, index_type_title, bm25_param_list, w_list, N, idx_title, idx_body, page_rank):
     """
       This function is performing a grid search upon different combination of parameters.
     The parameters can be BM25 parameters (i.e., bm25_param_list) or different weights (i.e., w_list).
@@ -156,48 +156,48 @@ def grid_search_models(data, true_relevancy, DL_body, index_type_body, DL_title,
     return models
 
 
-# def plot_metric_with_differnt_k_values(true_relevancy, predicted_relevancy, metrices_names, k_values):
-#     """
-#     This function plot a for each given metric its value depands on k_values as line chart.
-#     This function does not return any value.
-#
-#     Parameters
-#     ----------
-#     true_relevancy: list of tuples indicating the relevancy score for a query. Each element corresponds to a query.
-#     Example of a single element in the list:
-#                                             (3, {'question': ' what problems of heat conduction in composite slabs have been solved so far . ',
-#                                             'relevance_assessments': [(5, 3), (6, 3), (90, 3), (91, 3), (119, 3), (144, 3), (181, 3), (399, 3), (485, 1)]})
-#
-#     predicted_relevancy: a dictionary of the list. Each key represents the query_id. The value of the dictionary is a sorted list of relevant documents and their scores.
-#                          The list is sorted by the score.
-#     Example:
-#             key: 1
-#             value: [(13, 17.256625), (486, 13.539465), (12, 9.957595), (746, 9.599499999999999), (51, 9.171265), .....]
-#
-#     metrices_names: list of string representing the metrices to plot. For example: ['precision@k','recall@k','f_score@k']
-#
-#     k_values: list of integer of different k values. For example [1,3,5]
-#
-#     returns:
-#     plot values in format :
-#
-#     statistics[metric_name] = [values , k_values]
-#
-#     """
-#     statistics = {}
-#     metrices = {}
-#     for k in k_values:
-#         metrices[k] = evaluate(true_relevancy, predicted_relevancy, k, print_scores=False)
-#     for metric_name in metrices_names:
-#         # YOUR CODE HERE
-#         values = []
-#         for k in k_values:
-#             values.append(round(sum(metrices[k][metric_name]) / len(metrices[k][metric_name]), 3))
-#         statistics[metric_name] = [values, k_values]
-#         plt.plot(k_values, values)
-#         plt.title(metric_name)
-#         plt.show()
-#     return statistics
+def plot_metric_with_differnt_k_values(true_relevancy, predicted_relevancy, metrices_names, k_values):
+    """
+    This function plot a for each given metric its value depands on k_values as line chart.
+    This function does not return any value.
+
+    Parameters
+    ----------
+    true_relevancy: list of tuples indicating the relevancy score for a query. Each element corresponds to a query.
+    Example of a single element in the list:
+                                            (3, {'question': ' what problems of heat conduction in composite slabs have been solved so far . ',
+                                            'relevance_assessments': [(5, 3), (6, 3), (90, 3), (91, 3), (119, 3), (144, 3), (181, 3), (399, 3), (485, 1)]})
+
+    predicted_relevancy: a dictionary of the list. Each key represents the query_id. The value of the dictionary is a sorted list of relevant documents and their scores.
+                         The list is sorted by the score.
+    Example:
+            key: 1
+            value: [(13, 17.256625), (486, 13.539465), (12, 9.957595), (746, 9.599499999999999), (51, 9.171265), .....]
+
+    metrices_names: list of string representing the metrices to plot. For example: ['precision@k','recall@k','f_score@k']
+
+    k_values: list of integer of different k values. For example [1,3,5]
+
+    returns:
+    plot values in format :
+
+    statistics[metric_name] = [values , k_values]
+
+    """
+    statistics = {}
+    metrices = {}
+    for k in k_values:
+        metrices[k] = evaluate(true_relevancy, predicted_relevancy, k, print_scores=False)
+    for metric_name in metrices_names:
+        # YOUR CODE HERE
+        values = []
+        for k in k_values:
+            values.append(round(sum(metrices[k][metric_name]) / len(metrices[k][metric_name]), 3))
+        statistics[metric_name] = [values, k_values]
+        plt.plot(k_values, values)
+        plt.title(metric_name)
+        plt.show()
+    return statistics
 #
 #
 

@@ -1,12 +1,13 @@
 import math
 from contextlib import closing
-
 import numpy as np
 from operator import itemgetter
 
+from nltk.stem import PorterStemmer
+
 from inverted_index_gcp import MultiFileReader
 
-
+stemmer = PorterStemmer()
 def get_candidate_documents(query_to_search, index, words, pls):
     """
     Generate a dictionary representing a pool of candidate documents for a given query.
@@ -98,7 +99,6 @@ class BM25_from_index:
         -----------
         score: float, bm25 score.
         """
-        # YOUR CODE HERE
         unique_terms_in_queries = []
         for l in queries.values():
             unique_terms_in_queries += l
@@ -116,6 +116,7 @@ class BM25_from_index:
             candidate = get_candidate_documents(query[1], self.index, words, pls)
             scores[query[0]] = sorted([(doc_id, self._score(query[1], doc_id, term_frequencies_dict) + (self.page_rank[doc_id])) for doc_id in candidate],
                                       key=itemgetter(1), reverse=True)[:N]
+            # + (self.page_rank[doc_id])
         return scores
 
     def _score(self, query, doc_id, term_frequencies_dict):
@@ -132,8 +133,6 @@ class BM25_from_index:
         score: float, bm25 score.
         """
         score = 0.0
-        # if doc_id not in DL.keys():
-        #     return -math.inf
         doc_len = self.DL[doc_id]
         for term in query:
             if doc_id in term_frequencies_dict[term].keys():
@@ -153,8 +152,11 @@ class BM25_from_index:
             for i in range(index.df[w]):
                 doc_id = int.from_bytes(b[i * TUPLE_SIZE:i * TUPLE_SIZE + 4], 'big')
                 tf = int.from_bytes(b[i * TUPLE_SIZE + 4:(i + 1) * TUPLE_SIZE], 'big')
-                if(tf/self.DL[doc_id] > 1/200):
-                    posting_list.append((doc_id, tf))
+                try:
+                    if(tf/self.DL[doc_id] > 1/200):
+                        posting_list.append((doc_id, tf))
+                except:
+                    pass
         return posting_list
 
     def get_posting_gen(self, query):
@@ -171,6 +173,8 @@ class BM25_from_index:
             w_pls_dict[term] = temp_pls
         # words, pls = zip(*index.posting_lists_iter("title"))
         return w_pls_dict
+
+
 
 
 def merge_results(title_scores, body_scores, title_weight=0.5, text_weight=0.5, N=3):
@@ -238,3 +242,4 @@ def merge_results(title_scores, body_scores, title_weight=0.5, text_weight=0.5, 
     #         mergeDict[query1] = res1
     # return [(str(doc_id), IdTitle[doc_id]) for doc_id, score in list(mergeDict.values())[0]]
     return mergeDict
+

@@ -44,7 +44,6 @@ def get_posting_gen(index, query, index_type):
     for term in query:
         temp_pls = read_posting_list(index, term, index_type)
         w_pls_dict[term] = temp_pls
-    # words, pls = zip(*index.posting_lists_iter("title"))
     return w_pls_dict
 
 def generate_query_tfidf_vector(query_to_search, index, DL):
@@ -163,7 +162,7 @@ def generate_document_tfidf_matrix(query_to_search, index, words, pls, DL):
     return D
 
 
-def cosine_similarity(D, Q):
+def cosine_similarity(D, Q, docVecLen):
     """
     Calculate the cosine similarity for each candidate document in D and a given query (e.g., Q).
     Generate a dictionary of cosine similarity scores
@@ -184,12 +183,12 @@ def cosine_similarity(D, Q):
     """
     # YOUR CODE HERE
     cosineScore = {}
-    for index, doc in D.iterrows():
-        cosineScore[index] = np.dot(doc.to_numpy(), Q) / (np.linalg.norm(doc.to_numpy()) * np.linalg.norm(Q))
+    for doc_id, row in D.iterrows():
+        cosineScore[doc_id] = np.dot(row.to_numpy(), Q) / (float(docVecLen[doc_id]) * np.linalg.norm(Q))
     return (cosineScore)
 
 
-def get_top_n(sim_dict, IdTitle, N=3):
+def get_top_n(sim_dict, N=3):
     """
     Sort and return the highest N documents according to the cosine similarity score.
     Generate a dictionary of cosine similarity scores
@@ -207,10 +206,10 @@ def get_top_n(sim_dict, IdTitle, N=3):
     a ranked list of pairs (doc_id, score) in the length of N.
     """
     scores = sorted([(doc_id, round(score,5)) for doc_id, score in sim_dict.items()], key=lambda x: x[1], reverse=True)[:N]
-    return [(doc_id, IdTitle[doc_id]) for doc_id, score in scores]
-    # return scores
+    # return [(doc_id, IdTitle[doc_id]) for doc_id, score in scores]
+    return scores
 
-def get_topN_score_for_queries(queries_to_search, index, DL, IdTitle, index_type, N=3):
+def get_topN_score_for_queries(queries_to_search, index, DL, index_type, docVecLen, N=3):
     """
     Generate a dictionary that gathers for every query its topN score.
 
@@ -235,9 +234,8 @@ def get_topN_score_for_queries(queries_to_search, index, DL, IdTitle, index_type
         pls = tuple(words_pls.values())
         query_tfidf_vector = generate_query_tfidf_vector(queries_to_search[i + 1], index, DL)
         tf_idf_matrix = generate_document_tfidf_matrix(queries_to_search[i + 1], index, words, pls, DL)
-        cos_si = cosine_similarity(tf_idf_matrix, query_tfidf_vector)
-        dic[i + 1] = get_top_n(cos_si, IdTitle, N=N)
-
+        cos_si = cosine_similarity(tf_idf_matrix, query_tfidf_vector, docVecLen)
+        dic[i + 1] = get_top_n(cos_si, N=N)
     return list(dic.values())[0]
 
 
